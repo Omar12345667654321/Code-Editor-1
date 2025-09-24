@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>أداة تحويل الأسئلة بين النص وJSON</title>
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2ecc71;
+      --accent-color: #9b59b6;
+      --warning-color: #e67e22;
+      --danger-color: #e74c3c;
+      --light-color: #f9f9f9;
+      --dark-color: #333;
+      --border-color: #ddd;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      padding: 15px;
+      background-color: #f5f5f5;
+      background-image: url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      direction: rtl;
+      text-align: right;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--dark-color);
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      flex: 1;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+    }
+    
+    @media (min-width: 768px) {
+      .container {
+        flex-direction: row;
+      }
+    }
+    
+    .main-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .box {
+      margin-bottom: 15px;
+      background-color: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .vertical-buttons-box {
+      width: 100%;
+    }
+    
+    @media (min-width: 768px) {
+      .vertical-buttons-box {
+        width: 280px;
+        min-width: 280px;
+      }
+    }
+    
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-top: 8px;
+      font-size: 16px;
+      white-space: pre-wrap;
+      resize: vertical;
+      direction: ltr;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .buttons {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    button {
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: var(--light-color);
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      transition: all 0.3s;
+      flex: 1;
+      min-width: 100px;
+    }
+    
+    button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    
+    .vertical-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .vertical-buttons button {
+      width: 100%;
+      text-align: right;
+      padding: 10px;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: white;
+      border-color: var(--secondary-color);
+    }
+    
+    .btn-accent {
+      background-color: var(--accent-color);
+      color: white;
+      border-color: var(--accent-color);
+    }
+    
+    .btn-warning {
+      background-color: var(--warning-color);
+      color: white;
+      border-color: var(--warning-color);
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+      border-color: var(--danger-color);
+    }
+    
+    .dropdown {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: white;
+      width: 100%;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 10;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    
+    .dropdown-content button {
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-color);
+      text-align: right;
+    }
+    
+    .dropdown-content button:last-child {
+      border-bottom: none;
+    }
+    
+    .show {
+      display: block;
+    }
+    
+    .split-controls {
+      margin: 15px 0;
+      padding: 15px;
+      background-color: #f0f7fd;
+      border-radius: 5px;
+      display: none;
+    }
+    
+    .split-input {
+      padding: 8px;
+      width: 100px;
+      margin: 0 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+    }
+    
+    .split-boxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+    
+    .split-box {
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      padding: 10px;
+      background-color: white;
+      width: 100%;
+    }
+    
+    @media (min-width: 576px) {
+      .split-box {
+        width: calc(50% - 15px);
+      }
+    }
+    
+    .split-box h3 {
+      margin-top: 0;
+      color: var(--primary-color);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    
+    .split-box textarea {
+      height: 150px;
+      margin-bottom: 10px;
+    }
+    
+    .split-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    
+    .remaining-box {
+      width: 100%;
+      margin-top: 20px;
+      background-color: var(--light-color);
+      padding: 15px;
+      border-radius: 5px;
+    }
+    
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    .status {
+      margin: 10px 0;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    
+    .success {
+      color: #27ae60;
+      background-color: #e8f8f0;
+    }
+    
+    .error {
+      color: #e74c3c;
+      background-color: #fdecea;
+    }
+    
+    .question-counter {
+      margin: 10px 0;
+      color: #7f8c8d;
+      text-align: center;
+    }
+    
+    .conversion-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+    
+    .conversion-buttons button {
+      padding: 10px 20px;
+      font-size: 16px;
+      min-width: 200px;
+    }
+    
+    .stats-container {
+      margin-top: 15px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .stats-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    
+    .stats-item {
+      margin-bottom: 5px;
+    }
+    
+    .stats-bar {
+      height: 20px;
+      background-color: var(--primary-color);
+      border-radius: 3px;
+      margin-top: 5px;
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      padding: 10px;
+      color: #7f8c8d;
+      font-size: 14px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- عنصر الصوت -->
+  <audio id="startupSound">
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    المتصفح لا يدعم تشغيل الصوت
+  </audio>
+
+<h2>أداة تحويل الأسئلة بين النص وJSON</h2>
+
+<div class="container">
+  <div class="main-content">
+    <!-- حقل إدخال الأسئلة -->
+    <div class="box">
+      <label>الأسئلة العادية:</label>
+      <div class="buttons">
+        <button onclick="clearInput()" class="btn-danger">مسح</button>
+        <button onclick="downloadText()" class="btn-accent">تنزيل كملف نصي</button>
+      </div>
+      <textarea id="inputText" placeholder="ادخل الأسئلة هنا..."></textarea>
+    </div>
+
+    <!-- حقل عرض JSON -->
+    <div class="box">
+      <label>الصيغة بصيغة JSON:</label>
+      <div class="buttons">
+        <button onclick="clearJSON()" class="btn-danger">مسح</button>
+        <button onclick="downloadJSON()" class="btn-accent">تنزيل كملف JSON</button>
+      </div>
+      <textarea id="jsonOutput" placeholder="النتيجة ستظهر هنا..."></textarea>
+      <div id="status" class="status"></div>
+    </div>
+
+    <!-- قسم تقسيم الأسئلة -->
+    <div class="box" id="splitControls" style="display:none;">
+      <label>تقسيم الأسئلة:</label>
+      <div class="question-counter">عدد الأسئلة: <span id="inputCount">0</span></div>
+      <div class="split-controls" id="splitSection">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <input type="number" id="splitNumber" class="split-input" placeholder="عدد الأسئلة" min="1">
+          <button onclick="splitQuestions()" class="btn-primary">تقسيم الملف</button>
+          <button onclick="clearSplit()" class="btn-warning">مسح التقسيمات</button>
+          <button onclick="clearAllQuestions()" class="btn-danger">مسح الكل</button>
+        </div>
+        <div id="splitStatus" class="status"></div>
+        
+        <div class="split-boxes" id="splitBoxes"></div>
+        
+        <div class="remaining-box" id="remainingBox" style="display:none;">
+          <h3>الأسئلة المتبقية</h3>
+          <textarea id="remainingQuestions" readonly></textarea>
+          <div class="split-actions">
+            <button onclick="copyToClipboard('remainingQuestions')" class="btn-secondary">نسخ</button>
+            <button onclick="downloadSplit('remaining')" class="btn-accent">حفظ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- قسم الإحصائيات -->
+    <div class="box" id="statsBox" style="display:none;">
+      <label>إحصائيات الأسئلة:</label>
+      <div id="statsContainer" class="stats-container"></div>
+    </div>
+
+    <div class="conversion-buttons">
+      <button onclick="convertToJSON()" class="btn-primary">تحويل إلى JSON</button>
+      <button onclick="convertFromJSON()" class="btn-primary">تحويل من JSON إلى أسئلة عادية</button>
+    </div>
+  </div>
+
+  <!-- مربع الأزرار العمودية -->
+  <div class="box vertical-buttons-box">
+    <label>خيارات متقدمة:</label>
+    <div class="vertical-buttons">
+      <button onclick="shuffleQuestionsOnly()" class="btn-primary">خلط ترتيب الأسئلة فقط</button>
+      <button onclick="shuffleAnswersOnly()" class="btn-secondary">خلط الإجابات فقط</button>
+      <button onclick="shuffleBoth()" class="btn-accent">خلط الأسئلة والإجابات معاً</button>
+      
+      <!-- زر القائمة المنسدلة لتحديد موضع الإجابة الصحيحة -->
+      <div class="dropdown">
+        <button onclick="togglePositionDropdown()" class="btn-warning">تحديد موضع الإجابة الصحيحة ▽</button>
+        <div id="positionDropdown" class="dropdown-content">
+          <button onclick="setCorrectPosition(1)">الاختيار الأول</button>
+          <button onclick="setCorrectPosition(2)">الاختيار الثاني</button>
+          <button onclick="setCorrectPosition(3)">الاختيار الثالث</button>
+          <button onclick="setCorrectPosition(4)">الاختيار الرابع</button>
+        </div>
+      </div>
+      
+      <button onclick="toggleSplitSection()" class="btn-primary">تقسيم الملف</button>
+      <button onclick="clearAllQuestions()" class="btn-danger">مسح الكل</button>
+      <button onclick="showQuestionStats()" class="btn-accent">إحصائيات الأسئلة</button>
+      <button onclick="clearSplit()" class="btn-warning">مسح التقسيمات</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  أداة تحويل الأسئلة بين النص وJSON &copy; 2023
+</div>
+
+<script>
+  // ========== المتغيرات العامة ========== //
+  let originalQuestions = [];
+  let currentQuestions = [];
+  let splitFiles = [];
+  let remainingQuestions = [];
+  
+  // ========== تهيئة التطبيق عند التحميل ========== //
+  document.addEventListener('DOMContentLoaded', function() {
+    // تشغيل الصوت عند التحميل
+    try {
+      const audio = document.getElementById('startupSound');
+      audio.volume = 0.3;
+      audio.play().catch(error => {
+        console.log('يتطلب تفاعل المستخدم لتشغيل الصوت:', error);
+      });
+    } catch (e) {
+      console.log('خطأ في تشغيل الصوت:', e);
+    }
+
+    // تحميل البيانات المحفوظة من localStorage
+    const savedInput = localStorage.getItem('quizTool_inputText');
+    const savedOutput = localStorage.getItem('quizTool_jsonOutput');
+    
+    if (savedInput) {
+      document.getElementById('inputText').value = savedInput;
+    }
+    
+    if (savedOutput) {
+      document.getElementById('jsonOutput').value = savedOutput;
+      try {
+        const jsonString = savedOutput.replace(/,\s*$/, '');
+        const data = JSON.parse(jsonString.startsWith('[') ? jsonString : `[${jsonString}]`);
+        originalQuestions = data;
+        updateCounters();
+      } catch (e) {
+        console.log('لا يمكن تحميل البيانات المحفوظة:', e);
+      }
+    }
+  });
+  
+  // ========== حفظ البيانات قبل إغلاق الصفحة ========== //
+  window.addEventListener('beforeunload', function() {
+    localStorage.setItem('quizTool_inputText', document.getElementById('inputText').value);
+    localStorage.setItem('quizTool_jsonOutput', document.getElementById('jsonOutput').value);
+  });
+  
+  // ========== الدوال الأصلية ========== //
+  
+  // تحويل الأسئلة العادية إلى JSON
+  function convertToJSON() {
+    const input = document.getElementById("inputText").value.trim();
+    const output = document.getElementById("jsonOutput");
+
+    if (!input) {
+      alert('يرجى إدخال الأسئلة أولاً');
+      return;
+    }
+
+    const lines = input.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    let result = [];
+    let i = 0;
+
+    while (i < lines.length) {
+      const questionMatch = lines[i].match(/^(\d+\. )(.+)$/u);
+      if (!questionMatch) {
+        i++;
+        continue;
+      }
+
+      const question = questionMatch[2].trim();
+      i++;
+
+      const answers = [];
+      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+        const optionMatch = lines[i].match(/^\d+\.\s*(.+)$/u);
+        if (optionMatch) {
+          answers.push(optionMatch[1].trim());
+        }
+        i++;
+      }
+
+      let correctIndex = -1;
+      if (i < lines.length &&
+          (lines[i].startsWith("✅ Correct answer:") || lines[i].startsWith("✅ الإجابة الصحيحة:"))) {
+        const match = lines[i].match(/\((\d+)\)/);
+        if (match) {
+          correctIndex = parseInt(match[1]);
+        }
+        i++;
+      }
+
+      if (answers.length >= 2 && correctIndex >= 0) {
+        result.push({
+          q: question + " ",
+          a: answers.map(answer => answer + " "),
+          correct: correctIndex
+        });
+      }
+    }
+
+    if (result.length === 0) {
+      output.value = 'لم يتم العثور على أسئلة صالحة.';
+    } else {
+      const formattedResult = result.map(item =>
+        `{ "q": "${item.q}", "a": ["${item.a.join('","')}"], "correct": ${item.correct} }`
+      ).join(",\n");
+      output.value = formattedResult;
+      originalQuestions = result;
+      updateCounters();
+    }
+  }
+
+  // تحويل JSON إلى أسئلة عادية (يدعم كلا الصيغتين)
+  function convertFromJSON() {
+    const jsonInput = document.getElementById("jsonOutput").value.trim();
+    const output = document.getElementById("inputText");
+
+    if (!jsonInput) {
+      alert('يرجى إدخال JSON للتحويل');
+      return;
+    }
+
+    try {
+      let jsonString = jsonInput
+        .replace(/,\s*$/, '')
+        .replace(/\r?\n|\r/g, ' ')
+        .replace(/\s+/g, ' ')
+        .replace(/},\s*{/g, '},{')
+        .replace(/"\s*:\s*/g, '":')
+        .replace(/"\s*,\s*/g, '",')
+        .replace(/\{\s*"/g, '{"')
+        .replace(/"\s*\}/g, '"}')
+        .replace(/\[\s*"/g, '["')
+        .replace(/"\s*\]/g, '"]');
+
+      if (!jsonString.startsWith('[')) {
+        jsonString = '[' + jsonString + ']';
+      }
+      
+      const data = JSON.parse(jsonString);
+      let result = '';
+
+      data.forEach((item, index) => {
+        const question = (item.q || item.question || '').trim();
+        const answers = item.a || item.answers || [];
+        let correctIndex = item.correct || 1;
+        
+        correctIndex = Math.max(1, Math.min(correctIndex, answers.length));
+        
+        const isArabic = /[\u0600-\u06FF]/.test(question);
+        const correctLabel = isArabic ? "✅ الإجابة الصحيحة:" : "✅ Correct answer:";
+        
+        result += `${index + 1}. ${question}\n`;
+        
+        answers.forEach((answer, i) => {
+          result += `  ${i + 1}. ${answer}\n`;
+        });
+        
+        result += `${correctLabel} (${correctIndex}) ${answers[correctIndex - 1]}\n\n`;
+      });
+
+      output.value = result.trim();
+      originalQuestions = data;
+      updateCounters();
+      showStatus('تم التحويل بنجاح', false);
+    } catch (e) {
+      showStatus('JSON غير صالح: ' + e.message, true);
+    }
+  }
+
+  // تنزيل JSON كملف
+  function downloadJSON() {
+    const content = document.getElementById("jsonOutput").value.trim();
+    if (!content) {
+      alert('لا يوجد محتوى لتنزيله');
+      return;
+    }
+
+    const blob = new Blob([content], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'questions.json';
+    link.click();
+  }
+
+  // تنزيل النص العادي كملف
+  function downloadText() {
+    const content = document.getElementById("inputText").value.trim();
+    if (!content) {
+      alert('لا يوجد محتوى لتنزيله');
+      return;
+    }
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'questions.txt';
+    link.click();
+  }
+
+  // مسح الحقول
+  function clearInput() {
+    document.getElementById("inputText").value = '';
+    showStatus('تم مسح الأسئلة العادية', false);
+  }
+
+  function clearJSON() {
+    document.getElementById("jsonOutput").value = '';
+    showStatus('تم مسح JSON', false);
+  }
+
+  // ========== دوال الخلط ========== //
+
+  // خلط ترتيب الأسئلة فقط
+  function shuffleQuestionsOnly() {
+    if (!prepareQuestions()) return;
+    
+    currentQuestions = shuffleArray([...originalQuestions]);
+    displayResult(currentQuestions);
+    showStatus(`تم خلط ترتيب ${currentQuestions.length} سؤال بنجاح`, false);
+  }
+
+  // خلط الإجابات فقط
+  function shuffleAnswersOnly() {
+    if (!prepareQuestions()) return;
+    
+    currentQuestions = originalQuestions.map(question => {
+      if (!question.a || !Array.isArray(question.a) || question.a.length === 0) {
+        return question;
+      }
+      
+      const correctIndex = Math.max(0, Math.min(question.correct - 1, question.a.length - 1));
+      const correctAnswer = question.a[correctIndex];
+      const shuffledAnswers = shuffleArray([...question.a]);
+      const newCorrectIndex = shuffledAnswers.indexOf(correctAnswer) + 1;
+      
+      return {
+        q: question.q,
+        a: shuffledAnswers,
+        correct: newCorrectIndex
+      };
+    });
+    
+    displayResult(currentQuestions);
+    showStatus(`تم خلط إجابات ${currentQuestions.length} سؤال بنجاح`, false);
+  }
+
+  // خلط الأسئلة والإجابات معاً
+  function shuffleBoth() {
+    if (!prepareQuestions()) return;
+    
+    const shuffledQuestions = shuffleArray([...originalQuestions]);
+    
+    currentQuestions = shuffledQuestions.map(question => {
+      if (!question.a || !Array.isArray(question.a) || question.a.length === 0) {
+        return question;
+      }
+      
+      const correctIndex = Math.max(0, Math.min(question.correct - 1, question.a.length - 1));
+      const correctAnswer = question.a[correctIndex];
+      const shuffledAnswers = shuffleArray([...question.a]);
+      const newCorrectIndex = shuffledAnswers.indexOf(correctAnswer) + 1;
+      
+      return {
+        q: question.q,
+        a: shuffledAnswers,
+        correct: newCorrectIndex
+      };
+    });
+    
+    displayResult(currentQuestions);
+    showStatus(`تم خلط ترتيب الأسئلة وإجابات ${currentQuestions.length} سؤال بنجاح`, false);
+  }
+
+  // ========== دوال تحديد موضع الإجابة الصحيحة ========== //
+
+  // تبديل عرض القائمة المنسدلة
+  function togglePositionDropdown() {
+    document.getElementById("positionDropdown").classList.toggle("show");
+  }
+
+  // إغلاق القوائم المنسدلة عند النقر خارجها
+  window.onclick = function(event) {
+    if (!event.target.matches('.btn-warning') && !event.target.closest('.dropdown')) {
+      const dropdowns = document.getElementsByClassName("dropdown-content");
+      for (let i = 0; i < dropdowns.length; i++) {
+        const openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+          openDropdown.classList.remove('show');
+        }
+      }
+    }
+  }
+
+  // تحديد موضع الإجابة الصحيحة (الإصدار المعدل)
+  function setCorrectPosition(position) {
+    if (!prepareQuestions()) {
+      showStatus('لا يمكن تحميل الأسئلة للمعالجة', true);
+      return;
+    }
+    
+    try {
+      currentQuestions = originalQuestions.map(question => {
+        // التأكد من وجود إجابات وأن الموضع المطلوب موجود
+        if (!question.a || !Array.isArray(question.a) || question.a.length < position) {
+          return question;
+        }
+        
+        // الحصول على الإجابة الصحيحة الحالية
+        const currentCorrectIndex = question.correct - 1;
+        const correctAnswer = question.a[currentCorrectIndex];
+        
+        // إذا كانت الإجابة الصحيحة بالفعل في الموضع المطلوب، لا داعي للتغيير
+        if (currentCorrectIndex === position - 1) {
+          return question;
+        }
+        
+        // إنشاء نسخة جديدة من الإجابات
+        const newAnswers = [...question.a];
+        
+        // تبديل المواضع
+        [newAnswers[currentCorrectIndex], newAnswers[position - 1]] = 
+        [newAnswers[position - 1], newAnswers[currentCorrectIndex]];
+        
+        return {
+          q: question.q,
+          a: newAnswers,
+          correct: position
+        };
+      });
+      
+      displayResult(currentQuestions);
+      showStatus(`تم نقل الإجابة الصحيحة إلى الموضع ${position} لجميع الأسئلة`, false);
+      
+      // إغلاق القائمة المنسدلة بعد الاختيار
+      document.getElementById("positionDropdown").classList.remove("show");
+      
+    } catch (error) {
+      showStatus(`حدث خطأ أثناء تعديل موضع الإجابة: ${error.message}`, true);
+      console.error(error);
+    }
+  }
+
+  // ========== دوال تقسيم الأسئلة ========== //
+
+  // تبديل عرض قسم التقسيم
+  function toggleSplitSection() {
+    const splitControls = document.getElementById("splitControls");
+    splitControls.style.display = splitControls.style.display === 'none' ? 'block' : 'none';
+    document.getElementById("splitSection").style.display = 'block';
+  }
+
+  // تقسيم الأسئلة إلى مربعات منفصلة
+  function splitQuestions() {
+    const splitSize = parseInt(document.getElementById('splitNumber').value);
+    const boxesContainer = document.getElementById('splitBoxes');
+    const remainingContainer = document.getElementById('remainingBox');
+    boxesContainer.innerHTML = '';
+    remainingContainer.style.display = 'none';
+    
+    if (!splitSize || splitSize <= 0) {
+      showStatus('الرجاء إدخال عدد صحيح موجب للتقسيم', true);
+      return;
+    }
+    
+    if (!prepareQuestions()) {
+      return;
+    }
+    
+    splitFiles = [];
+    remainingQuestions = [];
+    const totalQuestions = originalQuestions.length;
+    const fullParts = Math.floor(totalQuestions / splitSize);
+    
+    for (let i = 0; i < fullParts; i++) {
+      const startIdx = i * splitSize;
+      const endIdx = startIdx + splitSize;
+      const chunk = originalQuestions.slice(startIdx, endIdx);
+      splitFiles.push(chunk);
+      
+      createSplitBox(chunk, i+1, startIdx+1, endIdx);
+    }
+    
+    const remainingCount = totalQuestions % splitSize;
+    if (remainingCount > 0) {
+      remainingQuestions = originalQuestions.slice(fullParts * splitSize);
+      
+      const remainingText = remainingQuestions.map(q => {
+        return `{ "q": "${q.q}", "a": ${JSON.stringify(q.a).replace(/\n\s*/g, '')}, "correct": ${q.correct} }`;
+      }).join(',\n');
+      
+      document.getElementById('remainingQuestions').value = remainingText;
+      remainingContainer.style.display = 'block';
+      
+      showStatus(`تم تقسيم الملف إلى ${fullParts} أجزاء كاملة (${splitSize} أسئلة لكل جزء) وبقي ${remainingCount} أسئلة`, false);
+    } else {
+      showStatus(`تم تقسيم الملف إلى ${fullParts} أجزاء كاملة (${splitSize} أسئلة لكل جزء)`, false);
+    }
+  }
+
+  // إنشاء مربع قسم
+  function createSplitBox(chunk, partNum, startNum, endNum) {
+    const box = document.createElement('div');
+    box.className = 'split-box';
+    
+    const formattedContent = chunk.map(q => {
+      return `{ "q": "${q.q}", "a": ${JSON.stringify(q.a).replace(/\n\s*/g, '')}, "correct": ${q.correct} }`;
+    }).join(',\n');
+    
+    box.innerHTML = `
+      <h3>الجزء ${partNum} (أسئلة ${startNum}-${endNum-1})</h3>
+      <textarea readonly>${formattedContent}</textarea>
+      <div class="split-actions">
+        <button onclick="copyToClipboard(this.previousElementSibling)" class="btn-secondary">نسخ</button>
+        <button onclick="downloadSplit(${partNum-1})" class="btn-accent">حفظ</button>
+      </div>
+    `;
+    
+    document.getElementById('splitBoxes').appendChild(box);
+  }
+
+  // مسح التقسيمات
+  function clearSplit() {
+    document.getElementById('splitBoxes').innerHTML = '';
+    document.getElementById('remainingBox').style.display = 'none';
+    document.getElementById('splitStatus').textContent = '';
+    splitFiles = [];
+    remainingQuestions = [];
+    showStatus('تم مسح جميع التقسيمات', false);
+  }
+
+  // مسح الكل
+  function clearAllQuestions() {
+    document.getElementById('inputText').value = '';
+    document.getElementById('jsonOutput').value = '';
+    document.getElementById('splitNumber').value = '';
+    clearSplit();
+    originalQuestions = [];
+    updateCounters();
+    showStatus('تم مسح جميع البيانات', false);
+    
+    // مسح البيانات المحفوظة
+    localStorage.removeItem('quizTool_inputText');
+    localStorage.removeItem('quizTool_jsonOutput');
+  }
+
+  // ========== دوال الإحصائيات ========== //
+
+  // عرض إحصائيات الأسئلة
+  function showQuestionStats() {
+    if (!prepareQuestions()) return;
+    
+    const statsBox = document.getElementById('statsBox');
+    statsBox.style.display = 'block';
+    
+    const statsContainer = document.getElementById('statsContainer');
+    const totalQuestions = originalQuestions.length;
+    
+    if (totalQuestions === 0) {
+      statsContainer.innerHTML = '<div class="stats-item">لا توجد أسئلة متاحة</div>';
+      return;
+    }
+    
+    // حساب توزيع الإجابات الصحيحة
+    const correctCounts = [0, 0, 0, 0];
+    originalQuestions.forEach(q => {
+      const correctIndex = q.correct - 1;
+      if (correctIndex >= 0 && correctIndex < 4) {
+        correctCounts[correctIndex]++;
+      }
+    });
+    
+    // حساب النسب المئوية
+    const percentages = correctCounts.map(count => 
+      totalQuestions > 0 ? Math.round((count / totalQuestions) * 100) : 0
+    );
+    
+    // بناء HTML للإحصائيات
+    let statsHTML = `
+      <div class="stats-title">إحصائيات الأسئلة</div>
+      <div class="stats-item">عدد الأسئلة: ${totalQuestions}</div>
+      <div class="stats-title" style="margin-top: 15px;">توزيع الإجابات الصحيحة:</div>
+    `;
+    
+    for (let i = 0; i < 4; i++) {
+      statsHTML += `
+        <div class="stats-item">
+          الإجابة ${i+1}: ${correctCounts[i]} سؤال (${percentages[i]}%)
+          <div class="stats-bar" style="width: ${percentages[i]}%"></div>
+        </div>
+      `;
+    }
+    
+    statsContainer.innerHTML = statsHTML;
+  }
+
+  // ========== الدوال المساعدة ========== //
+
+  // تحضير الأسئلة
+  function prepareQuestions() {
+    try {
+      const jsonInput = document.getElementById("jsonOutput").value.trim();
+      if (!jsonInput) {
+        // محاولة تحويل الإدخال النصي إلى JSON إذا كان حقل JSON فارغاً
+        const textInput = document.getElementById("inputText").value.trim();
+        if (textInput) {
+          const convertedJson = convertTextToJson(textInput);
+          if (convertedJson) {
+            document.getElementById("jsonOutput").value = convertedJson;
+            return prepareQuestions(); // إعادة المحاولة مع JSON الجديد
+          }
+        }
+        throw new Error('لم يتم إدخال أي أسئلة');
+      }
+      
+      let jsonString = jsonInput
+        .replace(/,\s*$/, '')
+        .replace(/\r?\n|\r/g, ' ')
+        .replace(/\s+/g, ' ')
+        .replace(/},\s*{/g, '},{');
+      
+      if (!jsonString.startsWith('[')) {
+        jsonString = '[' + jsonString + ']';
+      }
+      
+      originalQuestions = JSON.parse(jsonString);
+      
+      if (!Array.isArray(originalQuestions) || originalQuestions.length === 0) {
+        throw new Error('لا توجد أسئلة صالحة للمعالجة');
+      }
+      
+      updateCounters();
+      return true;
+    } catch (error) {
+      showStatus(`خطأ في تحضير الأسئلة: ${error.message}`, true);
+      console.error(error);
+      return false;
+    }
+  }
+
+  // دالة مساعدة لتحويل النص العادي إلى JSON
+  function convertTextToJson(textInput) {
+    try {
+      const lines = textInput.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+      let questions = [];
+      let currentQuestion = null;
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const questionMatch = line.match(/^(\d+\. )(.+)$/);
+        
+        if (questionMatch) {
+          if (currentQuestion) {
+            questions.push(currentQuestion);
+          }
+          currentQuestion = {
+            q: questionMatch[2].trim(),
+            a: [],
+            correct: 1
+          };
+        } else if (line.match(/^\d+\.\s/)) {
+          if (currentQuestion) {
+            currentQuestion.a.push(line.replace(/^\d+\.\s/, '').trim());
+          }
+        } else if (line.startsWith("✅ الإجابة الصحيحة:") || line.startsWith("✅ Correct answer:")) {
+          if (currentQuestion) {
+            const match = line.match(/\((\d+)\)/);
+            if (match) {
+              currentQuestion.correct = parseInt(match[1]);
+            }
+          }
+        }
+      }
+      
+      if (currentQuestion) {
+        questions.push(currentQuestion);
+      }
+      
+      return JSON.stringify(questions, null, 2);
+    } catch (e) {
+      console.error('فشل تحويل النص إلى JSON:', e);
+      return null;
+    }
+  }
+
+  // دالة الخلط الأساسية
+  function shuffleArray(array) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  }
+
+  // عرض النتائج
+  function displayResult(questions) {
+    const formattedOutput = questions.map(q => {
+      return `{ "q": "${q.q}", "a": ${JSON.stringify(q.a).replace(/\n\s*/g, '')}, "correct": ${q.correct} }`;
+    }).join(',\n');
+    
+    document.getElementById('jsonOutput').value = formattedOutput;
+    currentQuestions = questions;
+  }
+
+  // عرض رسائل الحالة
+  function showStatus(message, isError) {
+    const statusElement = document.getElementById('status');
+    statusElement.textContent = message;
+    statusElement.className = isError ? 'status error' : 'status success';
+  }
+
+  // نسخ النص إلى الحافظة
+  function copyToClipboard(element) {
+    if (typeof element === 'string') {
+      element = document.getElementById(element);
+    }
+    element.select();
+    document.execCommand('copy');
+    showStatus('تم نسخ النص إلى الحافظة', false);
+  }
+
+  // حفظ قسم معين
+  function downloadSplit(index) {
+    let content, filename;
+    
+    if (index === 'remaining') {
+      if (!remainingQuestions.length) {
+        showStatus('لا توجد أسئلة متبقية للحفظ', true);
+        return;
+      }
+      
+      content = document.getElementById('remainingQuestions').value;
+      filename = 'أسئلة_المتبقية.json';
+    } else {
+      if (!splitFiles[index]) {
+        showStatus('القسم المطلوب غير موجود', true);
+        return;
+      }
+      
+      content = splitFiles[index].map(q => {
+        return `{ "q": "${q.q}", "a": ${JSON.stringify(q.a).replace(/\n\s*/g, '')}, "correct": ${q.correct} }`;
+      }).join(',\n');
+      
+      filename = `أسئلة_الجزء_${index+1}.json`;
+    }
+    
+    saveToFile(content, filename);
+  }
+
+  // دالة مساعدة للحفظ
+  function saveToFile(content, filename) {
+    try {
+      const fullContent = '[\n' + content + '\n]';
+      const blob = new Blob([fullContent], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showStatus(`تم حفظ الملف ${filename} بنجاح`, false);
+    } catch (error) {
+      showStatus(`خطأ في حفظ الملف: ${error.message}`, true);
+    }
+  }
+
+  // تحديث عداد الأسئلة
+  function updateCounters() {
+    document.getElementById('inputCount').textContent = originalQuestions.length;
+  }
+
+  // تحديث العداد عند تغيير JSON
+  document.getElementById('jsonOutput').addEventListener('input', function() {
+    try {
+      const inputText = this.value.trim();
+      if (!inputText) {
+        originalQuestions = [];
+        updateCounters();
+        return;
+      }
+      
+      let jsonString = inputText.replace(/,\s*$/, '');
+      if (!jsonString.startsWith('[')) {
+        jsonString = '[' + jsonString + ']';
+      }
+      
+      jsonString = jsonString.replace(/\r?\n|\r/g, ' ')
+                            .replace(/\s+/g, ' ')
+                            .replace(/},\s*{/g, '},{');
+      
+      originalQuestions = JSON.parse(jsonString);
+      updateCounters();
+    } catch (e) {
+      originalQuestions = [];
+      updateCounters();
+    }
+  });
+</script>
+
+</body>
+</html>
